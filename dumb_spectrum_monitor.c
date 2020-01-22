@@ -56,7 +56,7 @@ int main(int nargs, char ** args)
 			
   const char * binary = "rtl_power_fftw"; 
   const char * frequency_range="100M:1200M:5K";
-  double gain = 10; 
+  int gain = 10; 
   const char * gpsd_port = "2947"; 
 
   config_t cfg;
@@ -65,13 +65,13 @@ int main(int nargs, char ** args)
   config_lookup_string(&cfg, "binary", &binary);
   config_lookup_string(&cfg, "gpsd_port", &gpsd_port);
   config_lookup_string(&cfg, "frequency_range", &frequency_range);
-  config_lookup_float(&cfg, "gain", &gain);
+  config_lookup_int(&cfg, "gain", &gain);
 
 
 	//increment the run counter
   int run = 0; 
 	FILE * frun = fopen(RUN_COUNTER,"r"); 
-	int ok = frun && fscanf(frun,"%d",&run); 
+	if (frun) fscanf(frun,"%d",&run); 
 
 	fclose(frun); 
   run++; 
@@ -104,7 +104,7 @@ int main(int nargs, char ** args)
 
   //craft the command
   char * cmd; 
-  asprintf(&cmd,"%s -f %s -g %f -n 1 > " TMP_DIR "/scan.dat", binary, frequency_range, gain); 
+  asprintf(&cmd,"%s -f %s -g %d -n 1 > " TMP_DIR "/scan.dat", binary, frequency_range, gain); 
 
   reset_tmp(); 
   //start the scanning thread
@@ -123,12 +123,12 @@ int main(int nargs, char ** args)
     {
       if (!gps_waiting(&gps, 5000000))
       {
-        fprintf(fgps, "%d,-1,-1,-999,-999,-999,-999\n",time(0)); 
+        fprintf(fgps, "%ld,-1,-1,-999,-999,-999,-999\n",time(0)); 
       }
       else
       {
         gps_read(&gps); 
-        fprintf(fgps,"%d,%f,%f,%f,%f,%f\n", time(0), gps.fix.mode, gps.fix.time, gps.fix.latitude, gps.fix.longitude, gps.fix.altitude, gps.satellites_visible); 
+        fprintf(fgps,"%ld,%d,%f,%f,%f,%f,%d\n", time(0), gps.fix.mode, gps.fix.time, gps.fix.latitude, gps.fix.longitude, gps.fix.altitude, gps.satellites_visible); 
       }
       //now check to see if the scan thread is done with a scan?
       if (!pthread_mutex_trylock(&scan_mutex))
