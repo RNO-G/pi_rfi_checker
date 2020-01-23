@@ -4,7 +4,7 @@ After=gpsd.service
 Wants=gpsd.service
 
 [Service]
-ExecStart=/home/pi/pi_rfi_survey/pi_rfi_survey
+ExecStart=/home/pi/pi_rfi_checker/pi_rfi_checker
 
 [Install]
 WantedBy=multi-user.target
