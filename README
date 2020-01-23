@@ -1,0 +1,45 @@
+This is a very stupid, very quickly-hacked together RFI monitor running on a
+raspberry pi.
+
+Components: 
+  - Raspberry pi 3 A+  (Any would probably work just as well... just that the
+    extra components on the B are not needed) 
+  - An RTL-SDR dongle (I used the NOOELEC NESDR Smart v4) 
+  - A GPS that communicates over UART (I used the
+    parallax sim33eau GPS module), which is connected to the appropriate RPI
+    UART pins. 
+
+The RPI must be set up to enable UART (can be done via raspi-config) and is
+assumed to have a /data directory (here this is a FAT32 partition that was
+mounted there... this ensures that this could be mounted on any system). 
+
+You need to set up rtl_power_fftw (https://github.com/AD-Vega/rtl-power-fftw),
+which requires a few things (obviously librtlsdr, fftw) and also GPSd (and GPSd
+must be instructed to use the correct device). 
+
+The code takes an rtl_power_fftw scan (with parameters defined in /data/config)
+and saves it in /data. Each time its run, the run number is incremented (using
+/data/counter, which will probably be created if it doesn't exist).  Each scan
+saves the binary and met file into a temp ramdisk and then is copied to the
+appropriate directory in data. Concurrently, the GPS data is streamed to a csv
+file. Because the RFI monitor is likely not connected to internet the RTC time
+can't be trusted by the GPS time can. Also the GPS position might be useful
+sometimes. The GPS and scan data are packaged together into sequential .tar.gz files. 
+
+
+To run on startup, install the systemd service and enable it. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
