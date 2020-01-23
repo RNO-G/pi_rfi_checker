@@ -13,7 +13,7 @@
 #define RUN_COUNTER_TMP "/data/count.tmp"
 #define DATA_PREFIX "/data" 
 #define CONFIG_FILE "/data/config"
-#define TMP_DIR "/dev/shm/dumb_spectrum_monitor"
+#define TMP_DIR "/dev/shm/pi_rfi_checker"
 
 
 void reset_tmp()

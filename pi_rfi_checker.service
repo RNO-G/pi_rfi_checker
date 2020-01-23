@@ -4,7 +4,7 @@ After=gpsd.service
 Wants=gpsd.service
 
 [Service]
-ExecStart=/home/pi/dumb_spectrum_monitor/dumb_spectrum_monitor
+ExecStart=/home/pi/pi_rfi_survey/pi_rfi_survey
 
 [Install]
 WantedBy=multi-user.target
