@@ -15,7 +15,8 @@ mounted there... this ensures that this could be mounted on any system).
 
 You need to set up rtl_power_fftw (https://github.com/AD-Vega/rtl-power-fftw),
 which requires a few things (obviously librtlsdr, fftw) and also GPSd (and GPSd
-must be instructed to use the correct device). 
+must be instructed to use the correct device). If you want to use fftw wisdom,
+you need to use my forked version (or wait for my pull request to be accepted). 
 
 The code takes an rtl_power_fftw scan (with parameters defined in /data/config)
 and saves it in /data. Each time its run, the run number is incremented (using

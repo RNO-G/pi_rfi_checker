@@ -60,6 +60,7 @@ int main(int nargs, char ** args)
 			
   const char * binary = "rtl_power_fftw"; 
   const char * frequency_range="50M:1650M";
+  const char * wisdom_file = ""; 
   int nbins = 512; 
   double gain = 10; 
   const char * gpsd_port = "2947"; 
@@ -72,6 +73,7 @@ int main(int nargs, char ** args)
   config_lookup_string(&cfg, "frequency_range", &frequency_range);
   config_lookup_float(&cfg, "gain", &gain);
   config_lookup_int(&cfg, "nbins", &nbins);
+  config_lookup_string(&cfg, "wisdom_file", &wisdom_file);
 
   
   int gain_cB = gain*10; 
@@ -106,13 +108,20 @@ int main(int nargs, char ** args)
 	free(dirname); 
   free(copy_cmd); 
 
-  //set up signals
+  //set up signals.
   signal(SIGINT, &handle_deadly); 
 
 
   //craft the command
   char * cmd; 
-  asprintf(&cmd,"%s -q -f %s -b %d -g %d -n 1 -m " TMP_DIR "/scan 2> /dev/null", binary, frequency_range, nbins, gain_cB); 
+  if (!strcmp(wisdom_file,""))
+  {
+    asprintf(&cmd,"%s -q -f %s -b %d -g %d -n 1 -m " TMP_DIR "/scan 2> /dev/null", binary, frequency_range, nbins, gain_cB); 
+  }
+  else
+  {
+    asprintf(&cmd,"%s -q -f %s -b %d -g %d -n 1 -W %s  -m " TMP_DIR "/scan 2> /dev/null", binary, frequency_range, nbins, gain_cB, wisdom_file); 
+  }
   printf("Command is %s\n", cmd); 
 
   reset_tmp(); 
