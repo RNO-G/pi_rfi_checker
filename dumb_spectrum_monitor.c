@@ -41,7 +41,11 @@ void * do_scan(void * cmd)
   while (!die)
   {
     pthread_mutex_lock(&scan_ready); 
-    system( (const char*) cmd); 
+    if(system( (const char*) cmd))
+    {
+      fprintf(stderr,"Trouble running %s. Sleeping for 10 seconds. \n", (const char*) cmd); 
+      sleep(10); 
+    }
     pthread_mutex_unlock(&scan_mutex); 
   }
   return 0; 
@@ -55,8 +59,9 @@ int main(int nargs, char ** args)
   //configuration
 			
   const char * binary = "rtl_power_fftw"; 
-  const char * frequency_range="100M:1200M:5K";
-  int gain = 10; 
+  const char * frequency_range="50M:1650M";
+  int nbins = 512; 
+  double gain = 10; 
   const char * gpsd_port = "2947"; 
 
   config_t cfg;
@@ -65,8 +70,11 @@ int main(int nargs, char ** args)
   config_lookup_string(&cfg, "binary", &binary);
   config_lookup_string(&cfg, "gpsd_port", &gpsd_port);
   config_lookup_string(&cfg, "frequency_range", &frequency_range);
-  config_lookup_int(&cfg, "gain", &gain);
+  config_lookup_float(&cfg, "gain", &gain);
+  config_lookup_int(&cfg, "nbins", &nbins);
 
+  
+  int gain_cB = gain*10; 
 
 	//increment the run counter
   int run = 0; 
@@ -104,7 +112,8 @@ int main(int nargs, char ** args)
 
   //craft the command
   char * cmd; 
-  asprintf(&cmd,"%s -f %s -g %d -n 1 > " TMP_DIR "/scan.dat", binary, frequency_range, gain); 
+  asprintf(&cmd,"%s -q -f %s -b %d -g %d -n 1 -m " TMP_DIR "/scan 2> /dev/null", binary, frequency_range, nbins, gain_cB); 
+  printf("Command is %s\n", cmd); 
 
   reset_tmp(); 
   //start the scanning thread
@@ -117,7 +126,7 @@ int main(int nargs, char ** args)
     //set up the gps output file 
     
 
-    FILE * fgps = fopen(TMP_DIR "/gps.dat","w"); 
+    FILE * fgps = fopen(TMP_DIR "/gps.csv","w"); 
     fprintf(fgps,"unixtime,fix,gps_time, lat, lon, alt, nsats\n"); 
     while(true) 
     {
@@ -140,8 +149,8 @@ int main(int nargs, char ** args)
     fclose(fgps); 
 
     char * tar_cmd; 
-    asprintf(&tar_cmd, "tar -C "TMP_DIR" --xform=\"s|.dat|.%06d.dat|\" -czf " DATA_PREFIX "/run_%05d/%06d.tar.gz scan.dat gps.dat", iscan,run,iscan); 
-    printf(tar_cmd); 
+    asprintf(&tar_cmd, "tar -C "TMP_DIR" --xform=\"s|\\.|.%06d.|\" -czf " DATA_PREFIX "/run_%05d/%06d.tar.gz scan.bin scan.met gps.csv", iscan,run,iscan); 
+  //  printf(tar_cmd); 
     system(tar_cmd); 
     reset_tmp(); 
     sync(); 
