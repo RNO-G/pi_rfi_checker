@@ -1,0 +1,10 @@
+[Unit]
+Description=The dumbest possible spectrum monitor
+After=gpsd.service
+Wants=gpsd.service
+
+[Service]
+ExecStart=/home/pi/dumb_spectrum_monitor/dumb_spectrum_monitor
+
+[Install]
+WantedBy=multi-user.target
